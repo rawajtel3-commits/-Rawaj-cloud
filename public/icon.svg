@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="rawajBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4E115A" />
+      <stop offset="100%" stop-color="#300638" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#rawajBg)" />
+  <g transform="translate(96, 132)" fill="none" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M248 212H84c-42 0-76-34-76-76 0-38 28-69 64-75C83 25 117 0 158 0c49 0 90 38 94 86 35 6 60 36 60 72 0 30-24 54-64 54z" />
+  </g>
+  <circle cx="384" cy="140" r="26" fill="#F5BA13" />
+</svg>

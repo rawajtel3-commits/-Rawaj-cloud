@@ -1,0 +1,6 @@
+{
+  "name": "Rawaj Cloud | رواج كلاود",
+  "description": "منصة التخزين السحابي الذكي فائقة الأمان والأداء للأفراد والمؤسسات مع التشفير الصفري والنسخ المتعدد والتوجيه السحابي الهجين.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
