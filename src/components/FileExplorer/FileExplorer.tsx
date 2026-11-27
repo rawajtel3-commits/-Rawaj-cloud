@@ -166,7 +166,7 @@ export const FileExplorer: React.FC<FileExplorerProps> = ({ onNewFolderClick, on
       onDragLeave={handleGlobalDragLeave}
       onDragOver={handleGlobalDragOver}
       onDrop={handleGlobalDrop}
-      className="relative flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto"
+      className="relative w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6"
     >
       {/* Full-view Drag and Drop Overlay for Uploads */}
       {isWindowDragOver && (

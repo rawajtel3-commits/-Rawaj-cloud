@@ -197,7 +197,7 @@ export const MessagesBackupView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 overflow-y-auto lg:overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 select-none pb-16 lg:pb-0">
+    <div className="w-full flex-1 flex flex-col lg:min-h-0 lg:overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 select-none pb-28 lg:pb-0">
       
       {/* Top Header Banner & Stats */}
       <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 shrink-0">

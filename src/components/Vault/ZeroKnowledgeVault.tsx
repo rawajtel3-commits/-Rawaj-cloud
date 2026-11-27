@@ -48,7 +48,7 @@ export const ZeroKnowledgeVault: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+    <div className="w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6">
       
       {/* Vault Top Hero & Architecture Banner */}
       <div className="relative rounded-2xl bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 text-white p-6 sm:p-8 border border-emerald-900/40 shadow-xl overflow-hidden">

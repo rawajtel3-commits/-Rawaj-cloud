@@ -334,7 +334,7 @@ export const ActivityLogView: React.FC = () => {
 
   return (
     <div
-      className="flex-1 flex flex-col min-h-0 bg-[#F9F8FA] dark:bg-slate-950 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 select-none"
+      className="w-full flex-1 flex flex-col bg-[#F9F8FA] dark:bg-slate-950 p-4 sm:p-6 lg:p-8 pb-28 space-y-6 select-none"
       role="region"
       aria-label={isAr ? 'سجل التدقيق والنشاطات' : 'Security Audit & Activity Log'}
     >

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StorageProvider, useStorage } from './context/StorageContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -11,6 +11,7 @@ import { SecuritySessionsView } from './components/Security/SecuritySessionsView
 import { DeveloperApiView } from './components/DeveloperApi/DeveloperApiView';
 import { ObservabilityView } from './components/SLA/ObservabilityView';
 import { CloudAccountingView } from './components/FinOps/CloudAccountingView';
+import { BillingReconciliationModule } from './components/FinOps/BillingReconciliationModule';
 import { StorageUsageInsightsView } from './components/Analytics/StorageUsageInsightsView';
 import { StorageCleanupView } from './components/Cleanup/StorageCleanupView';
 import { MessagesBackupView } from './components/MessagesBackup/MessagesBackupView';
@@ -20,10 +21,13 @@ import { MySubscriptionsView } from './components/Subscriptions/MySubscriptionsV
 import { MyActivePlansView } from './components/Subscriptions/MyActivePlansView';
 import { AvailablePlansView } from './components/Subscriptions/AvailablePlansView';
 import { ServicesCatalogView } from './components/Services/ServicesCatalogView';
+import { SocialVerificationView } from './components/Services/SocialVerificationView';
 import { AuthView } from './components/Auth/AuthView';
 import { ActivityLogView } from './components/Audit/ActivityLogView';
+import { CloudToolsView } from './components/CloudTools/CloudToolsView';
 import { SubPageBackBar } from './components/SubPageBackBar';
 import { PlanManagerModal } from './components/Plans/PlanManagerModal';
+import { SecurePaymentGatewayModal } from './components/Plans/SecurePaymentGatewayModal';
 import { OnboardingModal } from './components/Onboarding/OnboardingModal';
 import { FilePreviewModal } from './components/FileExplorer/FilePreviewModal';
 import { ShareFolderModal } from './components/FileExplorer/ShareFolderModal';
@@ -33,9 +37,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
-  Mail,
-  PhoneCall,
-  Headphones,
+  Menu,
   MessageCircle,
 } from 'lucide-react';
 
@@ -52,10 +54,16 @@ const MainLayout: React.FC = () => {
   const [newFolderName, setNewFolderName] = useState('');
   const [folderColor, setFolderColor] = useState('#0284C7');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [supportMenuOpen, setSupportMenuOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mainScrollRef = useRef<HTMLElement>(null);
 
   const isAr = lang === 'ar';
+
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [activeTab]);
 
   const handleCreateFolder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,10 +100,10 @@ const MainLayout: React.FC = () => {
       {/* Top Bar Navigation */}
       <Navbar onOpenMobileMenu={() => setMobileSidebarOpen(true)} />
 
-      {/* Main Workspace: Sidebar + Central Viewport */}
-      <div className="flex-1 flex-grow flex max-w-7xl w-full mx-auto min-h-0 overflow-hidden">
+      {/* Main Workspace: Full-bleed Central Viewport + Slide-over Sidebar Drawer */}
+      <div className="flex-1 flex-grow flex w-full min-h-0 overflow-hidden">
         
-        {/* Navigation Sidebar */}
+        {/* Slide-over Navigation Sidebar Drawer */}
         <Sidebar
           onNewFolderClick={() => setFolderModalOpen(true)}
           onUploadClick={handleUploadClick}
@@ -103,11 +111,19 @@ const MainLayout: React.FC = () => {
           onMobileClose={() => setMobileSidebarOpen(false)}
         />
 
-        {/* Central Viewport Router */}
-        <main className="flex-1 flex-grow flex flex-col min-h-0 min-w-0 overflow-y-auto bg-white dark:bg-slate-950">
+        {/* Central Viewport Router (Single Unified Page Scroll) */}
+        <main
+          ref={mainScrollRef}
+          className="flex-1 flex-grow flex flex-col min-h-0 min-w-0 overflow-y-auto overflow-x-hidden scroll-smooth bg-[#F3F2F5] dark:bg-slate-950"
+        >
           <SubPageBackBar />
 
-          {activeTab === 'home' && <HomeHubView />}
+          {activeTab === 'home' && (
+            <HomeHubView
+              onUploadClick={handleUploadClick}
+              onNewFolderClick={() => setFolderModalOpen(true)}
+            />
+          )}
 
           {activeTab === 'files' && (
             <FileExplorer
@@ -123,6 +139,7 @@ const MainLayout: React.FC = () => {
           {(activeTab === 'available-plans' || activeTab === 'plans') && <AvailablePlansView />}
 
           {activeTab === 'services' && <ServicesCatalogView />}
+          {activeTab === 'social-verification' && <SocialVerificationView />}
 
           {activeTab === 'vault' && <ZeroKnowledgeVault />}
 
@@ -139,10 +156,14 @@ const MainLayout: React.FC = () => {
           {activeTab === 'sla' && <ObservabilityView />}
 
           {activeTab === 'finops' && <CloudAccountingView />}
+          {activeTab === 'reconciliation' && <BillingReconciliationModule />}
           {activeTab === 'insights' && <StorageUsageInsightsView />}
           {activeTab === 'cleanup' && <StorageCleanupView />}
           {activeTab === 'auth' && <AuthView />}
           {activeTab === 'activity-log' && <ActivityLogView />}
+          {activeTab === 'cloud-tools' && (
+            <CloudToolsView onUploadClick={handleUploadClick} />
+          )}
         </main>
 
       </div>
@@ -155,6 +176,9 @@ const MainLayout: React.FC = () => {
 
       {/* Pricing & Checkout Modal */}
       <PlanManagerModal />
+
+      {/* Secure Payment Gateway Modal (Credit Card Verification & Instant Upgrade) */}
+      <SecurePaymentGatewayModal />
 
       {/* Onboarding Flow Modal */}
       <OnboardingModal />
@@ -238,133 +262,36 @@ const MainLayout: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Support Hub positioned cleanly above the fixed bottom navigation footer */}
-      <div className="fixed bottom-20 sm:bottom-24 rtl:left-4 sm:rtl:left-6 ltr:right-4 sm:ltr:right-6 z-40">
-        {/* Support Channels Popup Menu */}
-        {supportMenuOpen && (
-          <div className="absolute bottom-full mb-3 rtl:left-0 ltr:right-0 w-72 max-w-[calc(100vw-2rem)] p-3.5 bg-white dark:bg-slate-900 rounded-2xl border border-[#DCD3DF] dark:border-slate-800 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 text-[#1E1E24] dark:text-white">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#DCD3DF]/60 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <Headphones className="w-3.5 h-3.5 text-[#1AD062]" />
-                <span className="text-xs font-bold text-[#1E1E24] dark:text-white">
-                  {isAr ? 'قنوات التواصل المباشر' : 'Direct Contact & Support'}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSupportMenuOpen(false)}
-                className="p-1 text-[#6E6A75] hover:text-[#1E1E24] dark:hover:text-white rounded-lg hover:bg-[#F5EFF7] dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
+      {/* Floating Action Controls: positioned cleanly above the 72px fixed footer (z-30 stays strictly beneath Footer/Navbar z-40 popovers & Sidebar/Modals z-50) */}
+      {!mobileSidebarOpen && (
+        <>
+          {/* Circular Purple Floating Navigation Menu Button */}
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(true)}
+            aria-label={isAr ? 'فتح القائمة الجانبية' : 'Open navigation menu'}
+            className="fixed bottom-[calc(92px+env(safe-area-inset-bottom))] sm:bottom-[calc(96px+env(safe-area-inset-bottom))] rtl:left-[max(0.875rem,env(safe-area-inset-left))] ltr:right-[max(0.875rem,env(safe-area-inset-right))] sm:rtl:left-5 sm:ltr:right-5 z-30 mb-1 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#5D276E] hover:bg-[#4B1D5A] text-white shadow-xl shadow-[#3B004E]/35 ring-2 ring-white/20 flex items-center justify-center hover:-translate-y-0.5 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          >
+            <Menu className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.2} />
+          </button>
 
-            <div className="space-y-1.5 text-xs">
-              {/* Customer Service WhatsApp */}
-              <a
-                href="https://wa.me/967730005955"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setSupportMenuOpen(false)}
-                className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F5EFF7] dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-[#1AD062]/30 cursor-pointer group"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#1AD062]/10 text-[#1AD062] flex items-center justify-center shrink-0">
-                    <Headphones className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="font-bold block text-[#1E1E24] dark:text-white group-hover:text-[#1AD062] transition-colors">
-                      {isAr ? 'واتساب خدمة العملاء' : 'Customer Support'}
-                    </span>
-                    <span className="text-[10px] text-[#6E6A75] font-mono" dir="ltr">730005955</span>
-                  </div>
-                </div>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#1AD062]/15 text-[#1AD062] font-bold">24/7</span>
-              </a>
+          {/* Direct WhatsApp Support Floating Button */}
+          <a
+            href="https://wa.me/967730005955"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={isAr ? 'تواصل عبر واتساب الدعم المباشر' : 'Contact WhatsApp Support'}
+            title={isAr ? 'واتساب الدعم المباشر 24/7' : 'Direct WhatsApp Support 24/7'}
+            className="fixed bottom-[calc(92px+env(safe-area-inset-bottom))] sm:bottom-[calc(96px+env(safe-area-inset-bottom))] rtl:right-[max(0.875rem,env(safe-area-inset-right))] ltr:left-[max(0.875rem,env(safe-area-inset-left))] sm:rtl:right-5 sm:ltr:left-5 z-30 mb-1 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-[#25D366] hover:bg-[#1EB958] text-white shadow-lg shadow-emerald-900/25 ring-2 ring-white/85 dark:ring-slate-900/85 flex items-center justify-center hover:-translate-y-0.5 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          >
+            <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 fill-white/15" strokeWidth={2.1} />
+          </a>
+        </>
+      )}
 
-              {/* Management WhatsApp */}
-              <a
-                href="https://wa.me/967770600046"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setSupportMenuOpen(false)}
-                className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F5EFF7] dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-[#1AD062]/30 cursor-pointer group"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#1AD062]/10 text-[#1AD062] flex items-center justify-center shrink-0">
-                    <MessageCircle className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="font-bold block text-[#1E1E24] dark:text-white group-hover:text-[#1AD062] transition-colors">
-                      {isAr ? 'واتساب الإدارة' : 'Management WhatsApp'}
-                    </span>
-                    <span className="text-[10px] text-[#6E6A75] font-mono" dir="ltr">770600046</span>
-                  </div>
-                </div>
-                <span className="text-[10px] text-[#6E6A75] font-semibold">{isAr ? 'مباشر' : 'Direct'}</span>
-              </a>
-
-              {/* Management Phone Call */}
-              <a
-                href="tel:+967780080555"
-                onClick={() => setSupportMenuOpen(false)}
-                className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F5EFF7] dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-[#A38540]/30 cursor-pointer group"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#A38540]/10 text-[#A38540] flex items-center justify-center shrink-0">
-                    <PhoneCall className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="font-bold block text-[#1E1E24] dark:text-white group-hover:text-[#A38540] transition-colors">
-                      {isAr ? 'اتصال الإدارة' : 'Management Call'}
-                    </span>
-                    <span className="text-[10px] text-[#6E6A75] font-mono" dir="ltr">00967780080555</span>
-                  </div>
-                </div>
-                <span className="text-[10px] text-[#A38540] font-bold">{isAr ? 'هاتف' : 'Call'}</span>
-              </a>
-
-              {/* Management Official Email */}
-              <a
-                href="mailto:saad@rawajye.com"
-                onClick={() => setSupportMenuOpen(false)}
-                className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F5EFF7] dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-[#4E115A]/30 cursor-pointer group"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#F5EFF7] dark:bg-purple-950/60 text-[#4E115A] dark:text-purple-300 flex items-center justify-center shrink-0">
-                    <Mail className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="font-bold block text-[#1E1E24] dark:text-white group-hover:text-[#4E115A] transition-colors">
-                      {isAr ? 'البريد الإلكتروني للإدارة' : 'Management Email'}
-                    </span>
-                    <span className="text-[10px] text-[#6E6A75] font-mono" dir="ltr">saad@rawajye.com</span>
-                  </div>
-                </div>
-                <span className="text-[10px] text-[#4E115A] dark:text-purple-300 font-bold">{isAr ? 'إيميل' : 'Email'}</span>
-              </a>
-            </div>
-          </div>
-        )}
-
-        {/* Floating Trigger Button */}
-        <button
-          type="button"
-          onClick={() => setSupportMenuOpen(!supportMenuOpen)}
-          aria-label="Direct Support"
-          title={isAr ? 'معلومات التواصل والدعم الفني المباشر' : 'Direct Support & Contact Channels'}
-          className="flex items-center justify-center gap-2 w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-3 rounded-full bg-[#1AD062] hover:bg-[#17b856] text-white font-bold text-xs shadow-xl shadow-[#1AD062]/30 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
-        >
-          <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">
-            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.763.818 2.791.819h.005c3.18 0 5.767-2.586 5.767-5.766.001-3.182-2.585-5.805-5.766-5.805zm3.435 8.232c-.145.409-.838.775-1.164.823-.326.05-.742.062-2.18-.519-1.838-.742-3.023-2.614-3.114-2.735-.091-.121-.745-.989-.745-1.887 0-.898.469-1.34.636-1.521.167-.182.364-.228.486-.228.121 0 .243.002.349.006.111.005.26-.042.406.309.152.364.516 1.261.561 1.352.046.091.076.197.015.318-.06.121-.091.197-.182.304-.091.106-.192.237-.274.318-.091.091-.186.19-.08.372.106.182.471.777 1.01 1.258.694.619 1.28.811 1.462.902.182.091.288.076.395-.046.106-.121.456-.531.577-.713.121-.182.243-.152.409-.091.167.061 1.062.5 1.244.591.182.091.304.137.349.212.046.076.046.439-.099.848zM12 2C6.477 2 2 6.477 2 12c0 1.891.527 3.662 1.445 5.176L2 22l4.981-1.408A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" />
-          </svg>
-          <span className="hidden sm:inline font-semibold whitespace-nowrap">{isAr ? 'الدعم والتواصل' : 'Support & Contact'}</span>
-        </button>
-      </div>
-
-      {/* Global Notification Toast positioned above the bottom footer */}
+      {/* Global Notification Toast positioned cleanly above both footer and floating icons */}
       {notification && (
-        <div className="fixed bottom-20 sm:bottom-24 rtl:right-4 sm:rtl:right-6 ltr:left-4 sm:ltr:left-6 z-50 max-w-[calc(100vw-5.5rem)] sm:max-w-md bg-slate-900 text-white p-3.5 rounded-2xl shadow-2xl border border-slate-800 flex items-center gap-3 animate-in slide-in-from-bottom duration-200 text-xs font-medium">
+        <div className="fixed bottom-[calc(156px+env(safe-area-inset-bottom))] sm:bottom-[calc(168px+env(safe-area-inset-bottom))] rtl:right-4 sm:rtl:right-6 ltr:left-4 sm:ltr:left-6 z-50 max-w-[calc(100vw-2rem)] sm:max-w-md bg-slate-900 text-white p-3.5 rounded-2xl shadow-2xl border border-slate-800 flex items-center gap-3 animate-in slide-in-from-bottom duration-200 text-xs font-medium">
           {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />}
           {notification.type === 'warning' && <AlertCircle className="w-5 h-5 text-amber-400 shrink-0" />}
           {notification.type === 'info' && <Info className="w-5 h-5 text-blue-400 shrink-0" />}

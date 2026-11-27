@@ -45,7 +45,7 @@ export const ObservabilityView: React.FC = () => {
   ];
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+    <div className="w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6">
       
       {/* Top Banner */}
       <div className="relative rounded-2xl bg-gradient-to-br from-teal-900 via-slate-900 to-slate-950 text-white p-6 sm:p-8 shadow-xl border border-teal-900/30 overflow-hidden">
@@ -78,7 +78,7 @@ export const ObservabilityView: React.FC = () => {
       {/* SLA Target Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
         
-        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md space-y-2">
           <div className="text-slate-500 flex items-center justify-between">
             <span>{isAr ? 'استجابة API (p95)' : 'p95 API Latency'}</span>
             <span className="text-emerald-600 font-bold">{isAr ? 'ممتاز' : 'Optimal'}</span>
@@ -91,7 +91,7 @@ export const ObservabilityView: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md space-y-2">
           <div className="text-slate-500 flex items-center justify-between">
             <span>{isAr ? 'توليد Pre-signed URL' : 'Pre-signed URL Latency'}</span>
             <span className="text-emerald-600 font-bold">{isAr ? 'فائق' : 'Ultra-Fast'}</span>
@@ -104,7 +104,7 @@ export const ObservabilityView: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md space-y-2">
           <div className="text-slate-500 flex items-center justify-between">
             <span>{isAr ? 'بدء الفيديو (TTFF)' : 'Video Time-to-First-Frame'}</span>
             <span className="text-emerald-600 font-bold">{isAr ? 'سلس' : 'Instant'}</span>
@@ -117,7 +117,7 @@ export const ObservabilityView: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md space-y-2">
           <div className="text-slate-500 flex items-center justify-between">
             <span>{isAr ? 'متانة البيانات' : 'Data Durability'}</span>
             <span className="text-emerald-600 font-bold">11 Nines</span>
@@ -134,7 +134,7 @@ export const ObservabilityView: React.FC = () => {
 
       {/* Multi-AZ Replication Infrastructure */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-mono">
               {isAr ? 'مراكز البيانات ومناطق التوافر الجغرافية (Multi-AZ Clusters)' : 'Multi-AZ Availability Clusters'}

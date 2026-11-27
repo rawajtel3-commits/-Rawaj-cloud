@@ -63,7 +63,7 @@ export const SecuritySessionsView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+    <div className="w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6">
       
       {/* Top Banner */}
       <div className="relative rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white p-6 sm:p-8 shadow-xl border border-indigo-900/30 overflow-hidden">
@@ -197,7 +197,7 @@ export const SecuritySessionsView: React.FC = () => {
 
       {/* Emergency Recovery Codes */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
               {isAr ? 'رموز استرداد الحساب في حالات الطوارئ (Emergency Recovery Codes)' : 'Emergency Recovery Codes'}
@@ -239,7 +239,7 @@ export const SecuritySessionsView: React.FC = () => {
 
       {/* Connected Devices & Active Sessions */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-mono">
               {isAr ? `الجلسات والأجهزة النشطة (${sessions.length})` : `Active Sessions & Devices (${sessions.length})`}

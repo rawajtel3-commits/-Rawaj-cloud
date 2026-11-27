@@ -173,7 +173,7 @@ export const FileGrid: React.FC<FileGridProps> = ({
           <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 font-mono">
             {isAr ? `المجلدات (${currentFolders.length})` : `Folders (${currentFolders.length})`}
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {currentFolders.map(folder => {
               const isDropTarget = dropTargetFolderId === folder.id;
               const isFolderSelected = selectedFolderIds.includes(folder.id);
@@ -197,12 +197,12 @@ export const FileGrid: React.FC<FileGridProps> = ({
                   }}
                   onDrop={(e) => handleFolderDrop(e, folder.id)}
                   onContextMenu={(e) => handleFolderContextMenu(e, folder)}
-                  className={`group relative flex items-center gap-2.5 p-3 rounded-2xl transition-all cursor-pointer ${
+                  className={`group relative min-w-0 flex items-center gap-2.5 p-3 rounded-2xl transition-all duration-200 cursor-pointer ${
                     isDropTarget
                       ? 'bg-[#F5EFF7] dark:bg-purple-950/40 border-2 border-[#4E115A] ring-2 ring-[#4E115A]/30 scale-[1.03] shadow-md'
                       : isFolderSelected
                       ? 'bg-[#F5EFF7] dark:bg-purple-950/30 border-2 border-[#4E115A] ring-2 ring-[#4E115A]/20 shadow-sm'
-                      : 'bg-white dark:bg-slate-900 border border-[#DCD3DF] dark:border-slate-800 hover:border-[#4E115A]/60 hover:shadow-xs'
+                      : 'bg-white dark:bg-slate-900 border border-[#DCD3DF] dark:border-slate-800 hover:border-[#4E115A]/60 hover:-translate-y-0.5 hover:shadow-md'
                   }`}
                 >
                   {isDropTarget && (
@@ -335,12 +335,12 @@ export const FileGrid: React.FC<FileGridProps> = ({
                   onDragStart={(e) => handleDragStart(e, file)}
                   onDragEnd={handleDragEnd}
                   onContextMenu={(e) => handleContextMenu(e, file)}
-                  className={`group relative rounded-2xl bg-white dark:bg-slate-900 border transition-all duration-200 overflow-hidden flex flex-col cursor-grab active:cursor-grabbing select-none ${
+                  className={`group relative min-w-0 rounded-2xl bg-white dark:bg-slate-900 border transition-all duration-200 overflow-hidden flex flex-col cursor-grab active:cursor-grabbing select-none ${
                     isBeingDragged
                       ? 'opacity-40 border-dashed border-[#4E115A] scale-95 shadow-none'
                       : isSelected
                       ? 'border-[#4E115A] ring-2 ring-[#4E115A]/20 shadow-md'
-                      : 'border-[#DCD3DF] dark:border-slate-800 hover:border-[#4E115A]/60 hover:shadow-xs'
+                      : 'border-[#DCD3DF] dark:border-slate-800 hover:border-[#4E115A]/60 hover:-translate-y-0.5 hover:shadow-md'
                   }`}
                 >
                   {/* Card Header & Checkbox & Actions */}

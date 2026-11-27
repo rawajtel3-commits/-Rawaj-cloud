@@ -30,7 +30,7 @@ export const SelectiveSyncView: React.FC = () => {
   const totalSavedBytes = virtualFiles.reduce((acc, f) => acc + f.sizeBytes, 0) + 125 * 1024 * 1024 * 1024; // Base demo ~125GB saved!
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+    <div className="w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6">
       
       {/* Top Banner */}
       <div className="relative rounded-2xl bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800 text-white p-6 sm:p-8 shadow-xl overflow-hidden">
@@ -63,11 +63,11 @@ export const SelectiveSyncView: React.FC = () => {
       {/* Engine Architecture Metrics Strip */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
         
-        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3">
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
             <Cloud className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="text-[11px] text-slate-500 font-medium">
               {isAr ? 'الملفات عند الطلب (0 KB)' : 'Virtual On-Demand'}
             </div>
@@ -77,11 +77,11 @@ export const SelectiveSyncView: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3">
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
             <Database className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="text-[11px] text-slate-500 font-medium">
               {isAr ? 'الكاش المحلي (SQLite/Isar)' : 'Local SQLite Cache'}
             </div>
@@ -91,11 +91,11 @@ export const SelectiveSyncView: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3">
+        <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
             <GitFork className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="text-[11px] text-slate-500 font-medium">
               {isAr ? 'فض التعارضات المتزامنة' : 'Conflict Resolution'}
             </div>
@@ -109,7 +109,7 @@ export const SelectiveSyncView: React.FC = () => {
 
       {/* Folders Selective Sync Toggles */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider font-mono">
             {isAr ? 'المجلدات وحالة المزامنة المحلية' : 'Folder Sync Status & Storage Mode'}
           </h3>
@@ -120,16 +120,16 @@ export const SelectiveSyncView: React.FC = () => {
 
         <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
           {folders.map(folder => (
-            <div key={folder.id} className="p-4 flex items-center justify-between gap-4 hover:bg-slate-50/60 dark:hover:bg-slate-850 transition-colors">
-              <div className="flex items-center gap-3">
+            <div key={folder.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 hover:bg-slate-50/60 dark:hover:bg-slate-850 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                   style={{ backgroundColor: `${folder.color || '#0284C7'}20` }}
                 >
                   <Folder className="w-5 h-5" style={{ color: folder.color || '#0284C7' }} />
                 </div>
-                <div>
-                  <div className="font-bold text-slate-900 dark:text-white">
+                <div className="min-w-0">
+                  <div className="font-bold text-slate-900 dark:text-white truncate">
                     {folder.name}
                   </div>
                   <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5 font-mono">
@@ -142,7 +142,7 @@ export const SelectiveSyncView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2.5 shrink-0">
                 <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${
                   folder.isSyncPinned
                     ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
@@ -153,7 +153,7 @@ export const SelectiveSyncView: React.FC = () => {
 
                 <button
                   onClick={() => toggleFolderSync(folder.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     folder.isSyncPinned
                       ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
                       : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'

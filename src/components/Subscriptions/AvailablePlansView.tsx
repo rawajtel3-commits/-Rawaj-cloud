@@ -28,7 +28,7 @@ export const AvailablePlansView: React.FC = () => {
     allPlans,
     currentPlan,
     upgradePlan,
-    flexWalletBalance,
+    openPaymentGateway,
     showNotification,
   } = useStorage();
 
@@ -38,30 +38,16 @@ export const AvailablePlansView: React.FC = () => {
   // Mobile Feature Comparison Selected Plan
   const [mobileCompareTier, setMobileCompareTier] = useState<'free' | 'personal' | 'pro' | 'flex'>('pro');
 
-  // Checkout Modal State
-  const [checkoutPlan, setCheckoutPlan] = useState<PlanTier | null>(null);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'mada' | 'apple' | 'wallet' | 'flex'>('mada');
-  const [isProcessing, setIsProcessing] = useState(false);
-
   // Free Trial Modal State
   const [trialModalOpen, setTrialModalOpen] = useState(false);
   const [trialEmail, setTrialEmail] = useState('user@rawajye.com');
 
-  const handleCheckoutSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!checkoutPlan) return;
-    setIsProcessing(true);
-
-    setTimeout(() => {
-      upgradePlan(checkoutPlan.id);
-      setIsProcessing(false);
-      setCheckoutPlan(null);
-      showNotification(
-        `تمت عملية الشراء بنجاح وتفعيل باقة "${checkoutPlan.nameAr}" لحسابك!`,
-        `Purchase completed! "${checkoutPlan.nameEn}" plan is now active.`,
-        'success'
-      );
-    }, 1200);
+  const handleSelectPlan = (plan: PlanTier) => {
+    if (plan.id === 'free') {
+      upgradePlan(plan.id, { billingCycle });
+      return;
+    }
+    openPaymentGateway(plan, billingCycle);
   };
 
   const handleStartTrial = (e: React.FormEvent) => {
@@ -147,7 +133,7 @@ export const AvailablePlansView: React.FC = () => {
   ];
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-950 overflow-y-auto">
+    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-950">
       
       {/* View Header (Scrolls naturally with page content) */}
       <div className="border-b border-[#DCD3DF] dark:border-slate-800 bg-[#F5EFF7]/80 dark:bg-slate-900/80 px-3.5 sm:px-6 py-4">
@@ -218,7 +204,7 @@ export const AvailablePlansView: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto w-full px-3.5 sm:px-6 py-6 sm:py-8 pb-20 sm:pb-10 space-y-8 sm:space-y-10">
+      <div className="max-w-6xl mx-auto w-full px-3.5 sm:px-6 py-6 sm:py-8 pb-28 space-y-8 sm:space-y-10">
 
         {/* Pricing Cards Grid (Responsive 1-col on mobile, 2-col on tablet, 4-col on desktop) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -328,7 +314,7 @@ export const AvailablePlansView: React.FC = () => {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => setCheckoutPlan(plan)}
+                      onClick={() => handleSelectPlan(plan)}
                       className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 ${
                         isPro
                           ? 'bg-[#4E115A] hover:bg-[#3D0D47] text-white shadow-[#4E115A]/25'
@@ -336,7 +322,11 @@ export const AvailablePlansView: React.FC = () => {
                       }`}
                     >
                       <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                      <span>{isAr ? 'ترقية إلى هذه الباقة' : 'Upgrade to this Tier'}</span>
+                      <span>
+                        {plan.id === 'free'
+                          ? (isAr ? 'التحويل إلى المجانية' : 'Switch to Free')
+                          : (isAr ? 'ترقية الباقة الآن' : 'Upgrade Plan')}
+                      </span>
                     </button>
                   )}
                 </div>
@@ -554,165 +544,6 @@ export const AvailablePlansView: React.FC = () => {
         </div>
 
       </div>
-
-      {/* Checkout Modal (Fully Scrollable and Responsive on Mobile) */}
-      {checkoutPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-6 border border-[#DCD3DF] dark:border-slate-800 shadow-2xl space-y-4 sm:space-y-5">
-            
-            <div className="flex items-center justify-between pb-3 border-b border-[#DCD3DF] dark:border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#4E115A] text-white flex items-center justify-center shrink-0">
-                  <CreditCard className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm sm:text-base font-black text-[#1E1E24] dark:text-white">
-                    {isAr ? 'إتمام ترقية الباقة والاشتراك' : 'Complete Plan Upgrade'}
-                  </h3>
-                  <div className="text-xs text-[#6E6A75] dark:text-slate-400">
-                    {isAr ? checkoutPlan.nameAr : checkoutPlan.nameEn} (
-                    {checkoutPlan.storageGB >= 1024
-                      ? `${checkoutPlan.storageGB / 1024} TB`
-                      : `${checkoutPlan.storageGB} GB`}
-                    )
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setCheckoutPlan(null)}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Payment Method Selector */}
-            <div>
-              <label className="block text-xs font-bold text-[#1E1E24] dark:text-white mb-2">
-                {isAr ? 'اختر بوابة الدفع المعتمدة' : 'Select Payment Gateway'}
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setSelectedPaymentMethod('mada')}
-                  className={`p-2.5 sm:p-3 rounded-2xl border text-xs font-bold flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer ${
-                    selectedPaymentMethod === 'mada'
-                      ? 'border-[#4E115A] bg-[#4E115A]/5 text-[#4E115A] dark:text-purple-300 ring-2 ring-[#4E115A]/20'
-                      : 'border-[#DCD3DF] dark:border-slate-700 bg-[#F5EFF7]/40 dark:bg-slate-800 text-[#1E1E24] dark:text-white'
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4 shrink-0" />
-                  <span className="truncate">Mada / Visa / Master</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedPaymentMethod('apple')}
-                  className={`p-2.5 sm:p-3 rounded-2xl border text-xs font-bold flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer ${
-                    selectedPaymentMethod === 'apple'
-                      ? 'border-[#4E115A] bg-[#4E115A]/5 text-[#4E115A] dark:text-purple-300 ring-2 ring-[#4E115A]/20'
-                      : 'border-[#DCD3DF] dark:border-slate-700 bg-[#F5EFF7]/40 dark:bg-slate-800 text-[#1E1E24] dark:text-white'
-                  }`}
-                >
-                  <Smartphone className="w-4 h-4 shrink-0" />
-                  <span className="truncate">Apple Pay</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedPaymentMethod('wallet')}
-                  className={`p-2.5 sm:p-3 rounded-2xl border text-xs font-bold flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer ${
-                    selectedPaymentMethod === 'wallet'
-                      ? 'border-[#4E115A] bg-[#4E115A]/5 text-[#4E115A] dark:text-purple-300 ring-2 ring-[#4E115A]/20'
-                      : 'border-[#DCD3DF] dark:border-slate-700 bg-[#F5EFF7]/40 dark:bg-slate-800 text-[#1E1E24] dark:text-white'
-                  }`}
-                >
-                  <Wallet className="w-4 h-4 text-[#A38540] shrink-0" />
-                  <span className="truncate">{isAr ? 'محافظ محلية (فلوسك / الكريمي)' : 'Local Mobile Wallets'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedPaymentMethod('flex')}
-                  className={`p-2.5 sm:p-3 rounded-2xl border text-xs font-bold flex items-center gap-2 sm:gap-2.5 transition-all cursor-pointer ${
-                    selectedPaymentMethod === 'flex'
-                      ? 'border-[#4E115A] bg-[#4E115A]/5 text-[#4E115A] dark:text-purple-300 ring-2 ring-[#4E115A]/20'
-                      : 'border-[#DCD3DF] dark:border-slate-700 bg-[#F5EFF7]/40 dark:bg-slate-800 text-[#1E1E24] dark:text-white'
-                  }`}
-                >
-                  <Zap className="w-4 h-4 text-[#1AD062] shrink-0" />
-                  <span className="truncate">Flex Wallet (${flexWalletBalance.toFixed(2)})</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Order Summary */}
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-[#F5EFF7] dark:bg-slate-800/80 border border-[#DCD3DF] dark:border-slate-700 space-y-2 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-[#6E6A75] dark:text-slate-400">
-                  {isAr ? 'الباقة المختارة' : 'Selected Tier'}
-                </span>
-                <span className="font-bold text-[#1E1E24] dark:text-white">
-                  {isAr ? checkoutPlan.nameAr : checkoutPlan.nameEn}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#6E6A75] dark:text-slate-400">
-                  {isAr ? 'دورة المحاسبة' : 'Billing Cycle'}
-                </span>
-                <span className="font-bold text-[#1E1E24] dark:text-white">
-                  {billingCycle === 'annual' ? (isAr ? 'سنوي (وفر 20%)' : 'Annual (-20%)') : (isAr ? 'شهري' : 'Monthly')}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#6E6A75] dark:text-slate-400">
-                  {isAr ? 'ضريبة القيمة المضافة (SaaS B2B)' : 'VAT / Tax'}
-                </span>
-                <span className="font-bold text-[#1AD062]">0.00 USD</span>
-              </div>
-              <div className="pt-2 border-t border-[#DCD3DF] dark:border-slate-700 flex items-center justify-between text-xs sm:text-sm">
-                <span className="font-black text-[#1E1E24] dark:text-white">
-                  {isAr ? 'المبلغ الإجمالي المستحق' : 'Total Amount Due'}
-                </span>
-                <span className="font-black text-[#4E115A] dark:text-purple-300 text-sm sm:text-base font-mono">
-                  ${billingCycle === 'annual' ? checkoutPlan.priceAnnualUSD.toFixed(2) : checkoutPlan.priceMonthlyUSD.toFixed(2)} USD
-                </span>
-              </div>
-            </div>
-
-            {/* Submit Action */}
-            <form onSubmit={handleCheckoutSubmit} className="space-y-2.5 sm:space-y-3">
-              <button
-                type="submit"
-                disabled={isProcessing}
-                className="w-full py-2.5 sm:py-3 rounded-2xl bg-[#4E115A] hover:bg-[#3D0D47] text-white text-xs font-black shadow-lg shadow-[#4E115A]/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>{isAr ? 'جارِ معالجة الدفع الآمن والتفعيل...' : 'Processing secure checkout...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-                    <span>{isAr ? 'تأكيد الدفع وتفعيل الباقة فوراً' : 'Confirm & Activate Storage Now'}</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCheckoutPlan(null)}
-                className="w-full py-1.5 sm:py-2 text-xs font-bold text-[#6E6A75] dark:text-slate-400 hover:text-[#1E1E24] text-center cursor-pointer"
-              >
-                {isAr ? 'إلغاء والعودة للباقات' : 'Cancel and return to plans'}
-              </button>
-            </form>
-
-          </div>
-        </div>
-      )}
 
       {/* Free Trial Modal (Fully Scrollable and Responsive on Mobile) */}
       {trialModalOpen && (

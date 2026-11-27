@@ -138,7 +138,7 @@ void uploadCameraRoll() async {
   const gcpCost = (monthlyTransferGB * 0.12).toFixed(0);
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+    <div className="w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6">
       
       {/* Top Banner */}
       <div className="relative rounded-2xl bg-gradient-to-br from-purple-900 via-indigo-950 to-slate-950 text-white p-6 sm:p-8 shadow-xl border border-purple-900/30 overflow-hidden">

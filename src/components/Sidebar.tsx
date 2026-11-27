@@ -12,6 +12,7 @@ import {
   Code2,
   Activity,
   Calculator,
+  Scale,
   MessageSquareLock,
   Plus,
   FolderPlus,
@@ -27,6 +28,7 @@ import {
   User,
   LogOut,
   History,
+  BadgeCheck,
 } from 'lucide-react';
 import { StorageQuotaWidget } from './Sidebar/StorageQuotaWidget';
 
@@ -99,6 +101,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       isActive: activeTab === 'services',
       badge: isAr ? 'هوستينجر & AI' : 'Hostinger & AI',
       badgeColor: 'text-cyan-600 bg-cyan-50 border border-cyan-200 dark:bg-cyan-950/50 dark:border-cyan-800',
+    },
+    {
+      id: 'social-verification',
+      labelAr: 'توثيق حسابات التواصل الاجتماعي',
+      labelEn: 'Social Media Verification',
+      icon: BadgeCheck,
+      action: () => setActiveTab('social-verification'),
+      isActive: activeTab === 'social-verification',
+      badge: isAr ? 'الشارة الزرقاء' : 'Verified',
+      badgeColor: 'text-sky-600 bg-sky-50 border border-sky-200 dark:bg-sky-950/50 dark:border-sky-800',
     },
     {
       id: 'auth',
@@ -206,6 +218,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const adminItems = [
     {
+      id: 'cloud-tools',
+      labelAr: 'أدوات السحابة',
+      labelEn: 'Cloud Tools',
+      icon: Sparkles,
+      action: () => setActiveTab('cloud-tools'),
+      isActive: activeTab === 'cloud-tools',
+    },
+    {
       id: 'security',
       labelAr: 'الأمان والجلسات النشطة',
       labelEn: 'Security & Active Sessions',
@@ -268,6 +288,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       isActive: activeTab === 'finops',
       badge: isAr ? 'هامش 15%' : '15% Margin',
       badgeColor: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50',
+    },
+    {
+      id: 'reconciliation',
+      labelAr: 'مطابقة فواتير السحابة (JSON)',
+      labelEn: 'Billing Reconciliation',
+      icon: Scale,
+      action: () => setActiveTab('reconciliation'),
+      isActive: activeTab === 'reconciliation',
+      badge: isAr ? 'تدقيق' : 'Audit',
+      badgeColor: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-300',
     },
   ];
 
@@ -424,43 +454,36 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </>
   );
 
+  if (!mobileOpen) return null;
+
   return (
-    <>
-      {/* Desktop Persistent Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 xl:w-72 shrink-0 bg-white dark:bg-slate-900 border-x border-[#DCD3DF] dark:border-slate-800 p-4 justify-between transition-colors overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex">
+      <div
+        className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200"
+        onClick={onMobileClose}
+      />
+      <aside className="relative z-10 w-72 max-w-[85vw] h-full bg-white dark:bg-slate-900 border-e border-slate-200 dark:border-slate-800 p-4 flex flex-col justify-between overflow-y-auto shadow-2xl animate-in slide-in-from-start duration-200">
+        <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <img
+              src="/assets/aistudio/_________________20261107_140807______425b22ac.png"
+              alt="Rawaj Cloud"
+              className="w-7 h-7 object-contain rounded-md"
+            />
+            <span className="font-bold text-sm text-[#1E1E24] dark:text-white">
+              {isAr ? 'رواج كلاود' : 'Rawaj Cloud'}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={onMobileClose}
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
         {renderContent()}
       </aside>
-
-      {/* Mobile / Tablet Drawer Overlay */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
-          <div
-            className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200"
-            onClick={onMobileClose}
-          />
-          <aside className="relative z-10 w-72 max-w-[85vw] h-full bg-white dark:bg-slate-900 border-e border-slate-200 dark:border-slate-800 p-4 flex flex-col justify-between overflow-y-auto shadow-2xl animate-in slide-in-from-start duration-200">
-            <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <img
-                  src="/assets/aistudio/_________________20261107_140807______425b22ac.png"
-                  alt="Rawaj Cloud"
-                  className="w-7 h-7 object-contain rounded-md"
-                />
-                <span className="font-bold text-sm text-[#1E1E24] dark:text-white">
-                  {isAr ? 'رواج كلاود' : 'Rawaj Cloud'}
-                </span>
-              </div>
-              <button
-                onClick={onMobileClose}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            {renderContent()}
-          </aside>
-        </div>
-      )}
-    </>
+    </div>
   );
 };

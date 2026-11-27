@@ -29,6 +29,7 @@ import {
   ArrowUpDown,
   SlidersHorizontal,
 } from 'lucide-react';
+import { SocialVerificationView } from './SocialVerificationView';
 
 interface DomainResult {
   tld: string;
@@ -66,7 +67,7 @@ export const ServicesCatalogView: React.FC = () => {
   const isAr = lang === 'ar';
 
   // Category and Filter State
-  const [activeCategory, setActiveCategory] = useState<'all' | 'domains' | 'ai' | 'hosting'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'social-verification' | 'domains' | 'ai' | 'hosting'>('all');
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   
   // Domain Search and Extension Dropdown State
@@ -132,9 +133,20 @@ export const ServicesCatalogView: React.FC = () => {
       labelAr: 'جميع الخدمات الرقمية',
       labelEn: 'All Digital Services',
       icon: Layers,
-      count: 19,
-      descriptionAr: 'استعراض كافة الدومينات واشتراكات الذكاء الاصطناعي والاستضافة',
-      descriptionEn: 'Browse all domains, AI apps subscriptions, and cloud hosting',
+      count: 25,
+      descriptionAr: 'استعراض توثيق الحسابات والدومينات واشتراكات الذكاء الاصطناعي والاستضافة',
+      descriptionEn: 'Browse social verification, domains, AI apps subscriptions, and cloud hosting',
+    },
+    {
+      id: 'social-verification' as const,
+      labelAr: 'توثيق حسابات التواصل الاجتماعي',
+      labelEn: 'Social Account Verification',
+      icon: BadgeCheck,
+      count: 6,
+      badge: isAr ? 'توثيق رسمي' : 'Official Badge',
+      badgeColor: 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30',
+      descriptionAr: 'توثيق حسابات إنستغرام، فيسبوك، إكس، تيك توك، سناب شات وواتساب للأعمال',
+      descriptionEn: 'Official verification badges for Instagram, Facebook, X, TikTok, Snapchat & WhatsApp',
     },
     {
       id: 'domains' as const,
@@ -566,7 +578,7 @@ export const ServicesCatalogView: React.FC = () => {
   const CurrentCategoryIcon = currentCategoryObj.icon;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-950 overflow-y-auto">
+    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-950">
       
       {/* Top Header Banner (Relative to prevent content being trapped or hidden beneath when scrolling) */}
       <div className="border-b border-[#DCD3DF] dark:border-slate-800 bg-[#F5EFF7]/80 dark:bg-slate-900/80 backdrop-blur-md px-4 sm:px-6 py-4 sm:py-5 relative z-20 shrink-0">
@@ -782,6 +794,13 @@ export const ServicesCatalogView: React.FC = () => {
       </div>
 
       <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-5 pb-28 space-y-8 sm:space-y-10">
+
+        {/* SECTION 0: SOCIAL MEDIA ACCOUNT VERIFICATION */}
+        {(activeCategory === 'all' || activeCategory === 'social-verification') && (
+          <div className="pb-2">
+            <SocialVerificationView embedded />
+          </div>
+        )}
 
         {/* SECTION 1: HOSTINGER DOMAIN REGISTRATION & CHECKER */}
         {(activeCategory === 'all' || activeCategory === 'domains') && (

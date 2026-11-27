@@ -112,7 +112,7 @@ export const BatchActionBar: React.FC<BatchActionBarProps> = ({
 
   return (
     <>
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-2xl sm:w-auto animate-in slide-in-from-bottom-5 fade-in duration-200">
+      <div className="fixed bottom-[calc(88px+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-2xl sm:w-auto animate-in slide-in-from-bottom-5 fade-in duration-200">
         <div className="bg-[#1E1E24]/95 dark:bg-[#1E1E24]/95 text-white backdrop-blur-xl border border-[#DCD3DF]/30 dark:border-slate-700 shadow-2xl rounded-2xl p-2.5 sm:px-4 sm:py-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 sm:gap-4 ring-1 ring-white/10">
           
           {/* Section 1: Selected Count & Breakdown */}

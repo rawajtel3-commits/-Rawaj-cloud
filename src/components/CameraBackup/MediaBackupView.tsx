@@ -28,7 +28,7 @@ export const MediaBackupView: React.FC = () => {
   const mediaFiles = files.filter(f => (f.type === 'image' || f.type === 'video') && !f.isTrash);
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+    <div className="w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6">
       
       {/* Top Banner */}
       <div className="relative rounded-2xl bg-gradient-to-br from-orange-600 via-amber-600 to-amber-700 text-white p-6 sm:p-8 shadow-xl overflow-hidden">
@@ -58,7 +58,7 @@ export const MediaBackupView: React.FC = () => {
 
       {/* Sync Configuration Card */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs space-y-5">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
               {isAr ? 'إعدادات المزامنة التلقائية والشبكة' : 'Backup Rules & Optimization'}
@@ -168,7 +168,7 @@ export const MediaBackupView: React.FC = () => {
 
       {/* Media Gallery Feed */}
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">
             {isAr ? 'الوسائط المتزامنة في السحابة' : 'Synced Camera Memories'}
           </h3>
@@ -182,7 +182,7 @@ export const MediaBackupView: React.FC = () => {
             <div
               key={file.id}
               onClick={() => setPreviewFile(file)}
-              className="group relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-800 cursor-pointer shadow-xs"
+              className="group relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-800 cursor-pointer shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <img
                 src={file.thumbnailUrl || '/assets/aistudio/_________________20261107_140807______425b22ac.png'}

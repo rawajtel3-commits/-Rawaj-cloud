@@ -5,7 +5,6 @@ import {
   generateStandardPackages,
   convertCurrency,
   formatCurrency,
-  SAMPLE_PROVIDER_INVOICE,
   SAMPLE_FINOPS_KPIS,
 } from '../../utils/finopsCalculator';
 import {
@@ -50,6 +49,7 @@ import { FinOpsTrendChart } from './FinOpsTrendChart';
 import { PredictiveRevenueForecast } from './PredictiveRevenueForecast';
 import { PlanManagementPanel } from './PlanManagementPanel';
 import { SpendThresholdModal } from './SpendThresholdModal';
+import { BillingReconciliationModule } from './BillingReconciliationModule';
 
 export const CloudAccountingView: React.FC = () => {
   const { lang, showNotification, setPlansModalOpen } = useStorage();
@@ -199,7 +199,7 @@ export const CloudAccountingView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+    <div className="w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6">
       
       {/* Top Banner & FinOps Title */}
       <div className="rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white p-6 sm:p-8 border border-indigo-900/50 shadow-xl relative overflow-hidden">
@@ -959,87 +959,7 @@ export const CloudAccountingView: React.FC = () => {
       {/* TAB 3: PROVIDER INVOICE RECONCILIATION & VARIANCE ANALYSIS     */}
       {/* ============================================================== */}
       {activeSubTab === 'reconciliation' && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                {isAr ? 'مطابقة فواتير مزود السحابة وتحليل التباين (Invoice Reconciliation)' : 'Provider Invoice Reconciliation'}
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {isAr
-                  ? 'مقارنة آلية بين الميزانية المقدرة ونموذج التكلفة وبين الفاتورة الفعلية للمزود (AWS/GCP/Wasabi) لكشف أي هدر أو تسريب في التكاليف.'
-                  : 'Automated auditing engine matching estimated cost models against actual monthly cloud provider invoices.'}
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 rounded-lg border border-emerald-500/20">
-                {isAr ? 'حالة المطابقة: 98.2% متوافقة' : 'Reconciliation Status: 98.2% Matched'}
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left rtl:text-right border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-mono">
-                    <th className="py-3 px-4 font-semibold">{isAr ? 'البند السحابي' : 'Cloud Service Item'}</th>
-                    <th className="py-3 px-4 font-semibold">{isAr ? 'الاستهلاك الفعلي الموزون' : 'Metered Consumption'}</th>
-                    <th className="py-3 px-4 font-semibold text-right rtl:text-left">{isAr ? 'المقدر (USD)' : 'Budget (USD)'}</th>
-                    <th className="py-3 px-4 font-semibold text-right rtl:text-left">{isAr ? 'المفوتر الفعلي (USD)' : 'Actual Billed'}</th>
-                    <th className="py-3 px-4 font-semibold text-center">{isAr ? 'التباين (%)' : 'Variance (%)'}</th>
-                    <th className="py-3 px-4 font-semibold">{isAr ? 'التوصية وتفادي الهدر' : 'FinOps Recommendation'}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                  {SAMPLE_PROVIDER_INVOICE.map(item => (
-                    <tr key={item.serviceId} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3 px-4">
-                        <span className="font-semibold text-slate-900 dark:text-white block">
-                          {isAr ? item.serviceNameAr : item.serviceNameEn}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-mono">
-                          ID: {item.serviceId} · {item.category}
-                        </span>
-                      </td>
-
-                      <td className="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">
-                        {item.meteredUsage}
-                      </td>
-
-                      <td className="py-3 px-4 text-right rtl:text-left font-mono font-medium">
-                        ${item.expectedCostUSD.toFixed(2)}
-                      </td>
-
-                      <td className="py-3 px-4 text-right rtl:text-left font-mono font-bold text-slate-900 dark:text-white">
-                        ${item.actualBilledUSD.toFixed(2)}
-                      </td>
-
-                      <td className="py-3 px-4 text-center">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[11px] font-bold ${
-                            item.variancePercent > 10
-                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
-                              : item.variancePercent < -5
-                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
-                              : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
-                          }`}
-                        >
-                          {item.variancePercent > 0 ? `+${item.variancePercent.toFixed(1)}%` : `${item.variancePercent.toFixed(1)}%`}
-                        </span>
-                      </td>
-
-                      <td className="py-3 px-4 text-[11px] text-slate-600 dark:text-slate-400 max-w-sm">
-                        {isAr ? item.optimizationTipAr : item.optimizationTipEn}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <BillingReconciliationModule currency={currency} embedded />
       )}
 
       {/* ============================================================== */}

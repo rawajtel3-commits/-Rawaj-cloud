@@ -11,6 +11,7 @@ import {
   SecuritySettings,
   SecurityAuditItem,
   UserSubscription,
+  SubscriptionInvoice,
   FolderShareConfig,
 } from '../types/storage';
 import { ChatConversation, MessagesBackupSettings } from '../types/messages';
@@ -60,7 +61,19 @@ export type ActiveTabType =
   | 'cleanup'
   | 'services'
   | 'auth'
-  | 'activity-log';
+  | 'activity-log'
+  | 'cloud-tools'
+  | 'reconciliation'
+  | 'social-verification';
+
+export interface UpgradePlanOptions {
+  billingCycle?: 'monthly' | 'annual';
+  cardBrand?: string;
+  cardLast4?: string;
+  transactionRef?: string;
+  invoiceNumber?: string;
+  keepModalOpen?: boolean;
+}
 
 interface StorageContextType {
   lang: 'ar' | 'en';
@@ -131,7 +144,7 @@ interface StorageContextType {
   // Quota & Billing
   currentPlan: PlanTier;
   setCurrentPlan: (plan: PlanTier) => void;
-  upgradePlan: (planId: PlanTier['id']) => void;
+  upgradePlan: (planId: PlanTier['id'], options?: UpgradePlanOptions) => void;
   flexWalletBalance: number;
   topUpFlexWallet: (amount: number) => void;
   quota: StorageQuota;
@@ -152,6 +165,10 @@ interface StorageContextType {
   setVersionHistoryFile: (file: FileItem | null) => void;
   plansModalOpen: boolean;
   setPlansModalOpen: (open: boolean) => void;
+  paymentGatewayPlan: PlanTier | null;
+  paymentGatewayCycle: 'monthly' | 'annual';
+  openPaymentGateway: (plan?: PlanTier, billingCycle?: 'monthly' | 'annual') => void;
+  closePaymentGateway: () => void;
   onboardingOpen: boolean;
   setOnboardingOpen: (open: boolean) => void;
 
@@ -240,7 +257,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const validTabs: ActiveTabType[] = [
         'home', 'files', 'subscriptions', 'my-plans', 'available-plans',
         'vault', 'media', 'sync', 'security', 'developer', 'sla', 'plans',
-        'finops', 'messages', 'insights', 'cleanup', 'services', 'auth', 'activity-log'
+        'finops', 'reconciliation', 'messages', 'insights', 'cleanup', 'services', 'social-verification', 'auth', 'activity-log', 'cloud-tools'
       ];
       if (validTabs.includes(hash)) return hash;
     }
@@ -288,7 +305,7 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const validTabs: ActiveTabType[] = [
         'home', 'files', 'subscriptions', 'my-plans', 'available-plans',
         'vault', 'media', 'sync', 'security', 'developer', 'sla', 'plans',
-        'finops', 'messages', 'insights', 'cleanup', 'services', 'auth', 'activity-log'
+        'finops', 'reconciliation', 'messages', 'insights', 'cleanup', 'services', 'social-verification', 'auth', 'activity-log', 'cloud-tools'
       ];
       if (validTabs.includes(hash)) {
         setActiveTabState(hash);
@@ -447,6 +464,8 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [shareFolder, setShareFolder] = useState<FolderItem | null>(null);
   const [versionHistoryFile, setVersionHistoryFile] = useState<FileItem | null>(null);
   const [plansModalOpen, setPlansModalOpen] = useState(false);
+  const [paymentGatewayPlan, setPaymentGatewayPlan] = useState<PlanTier | null>(null);
+  const [paymentGatewayCycle, setPaymentGatewayCycle] = useState<'monthly' | 'annual'>('annual');
   const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   // Upload state
@@ -1448,19 +1467,158 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     showNotification('تم إنهاء جميع الجلسات والأجهزة الأخرى بنجاح', 'All other active sessions revoked', 'success');
   }, [showNotification]);
 
-  // Plan Management
-  const upgradePlan = useCallback((planId: string) => {
-    const target = allPlans.find(p => p.id === planId) || PLAN_TIERS.find(p => p.id === planId);
-    if (target) {
-      setCurrentPlan(target);
-      setPlansModalOpen(false);
-      showNotification(
-        `تمت ترقية باقتك إلى "${target.nameAr}" مع تفعيل المساحة الفورية`,
-        `Successfully upgraded to "${target.nameEn}" plan`,
-        'success'
+  // Secure Payment Gateway Modal triggers
+  const openPaymentGateway = useCallback((plan?: PlanTier, billingCycle: 'monthly' | 'annual' = 'annual') => {
+    const activePlans = allPlans.filter(p => p.isActive !== false);
+    let targetPlan = plan;
+
+    if (!targetPlan) {
+      // Pick the next higher paid tier relative to currentPlan
+      const paidUpgradeCandidates = activePlans.filter(
+        p => p.id !== currentPlan.id && p.id !== 'free'
       );
+      targetPlan =
+        paidUpgradeCandidates.find(p => p.storageGB > currentPlan.storageGB) ||
+        paidUpgradeCandidates.find(p => p.id === 'pro') ||
+        paidUpgradeCandidates[0] ||
+        activePlans.find(p => p.id !== 'free') ||
+        PLAN_TIERS[2];
     }
-  }, [allPlans, showNotification]);
+
+    setPlansModalOpen(false);
+    setPaymentGatewayCycle(billingCycle);
+    setPaymentGatewayPlan(targetPlan);
+  }, [allPlans, currentPlan]);
+
+  const closePaymentGateway = useCallback(() => {
+    setPaymentGatewayPlan(null);
+  }, []);
+
+  // Plan Management
+  const upgradePlan = useCallback((planId: string, options?: UpgradePlanOptions) => {
+    const target = allPlans.find(p => p.id === planId) || PLAN_TIERS.find(p => p.id === planId);
+    if (!target) return;
+
+    const cycle = options?.billingCycle ?? 'annual';
+    const chargedAmount =
+      target.id === 'flex'
+        ? Math.max(target.priceMonthlyUSD || 9.99, 9.99)
+        : cycle === 'annual'
+        ? target.priceAnnualUSD
+        : target.priceMonthlyUSD;
+
+    const now = new Date();
+    const renewal = new Date(now);
+    if (cycle === 'annual') {
+      renewal.setFullYear(renewal.getFullYear() + 1);
+    } else {
+      renewal.setMonth(renewal.getMonth() + 1);
+    }
+
+    const startDateISO = now.toISOString();
+    const nextRenewalISO = renewal.toISOString();
+    const dateShort = startDateISO.slice(0, 10);
+    const brandLabel = options?.cardBrand || 'Visa';
+    const last4 = options?.cardLast4 || '4242';
+    const maskedCardLabel =
+      target.id === 'free'
+        ? 'Free Tier (No Card Required)'
+        : `${brandLabel} (•••• ${last4})`;
+    const invNum =
+      options?.invoiceNumber ||
+      `INV-RWJ-${now.getFullYear()}-${String(Math.floor(1000 + Math.random() * 9000))}`;
+    const txnRef =
+      options?.transactionRef ||
+      `TXN-RWJ-${Date.now().toString(36).toUpperCase().slice(-8)}`;
+
+    setCurrentPlan(target);
+    setCurrentUser(prev =>
+      prev ? { ...prev, allocatedStorageGB: target.storageGB } : prev
+    );
+
+    // Sync active subscription & prepend new official paid invoice
+    setSubscriptions(prev => {
+      const existingInvoices = prev[0]?.invoices || [];
+      const newInvoice: SubscriptionInvoice = {
+        id: `inv-${Date.now()}`,
+        invoiceNumber: invNum,
+        date: dateShort,
+        amountUSD: chargedAmount,
+        status: 'paid',
+        billingPeriod:
+          cycle === 'annual'
+            ? `${dateShort} → ${nextRenewalISO.slice(0, 10)} (Annual)`
+            : `${dateShort} → ${nextRenewalISO.slice(0, 10)} (Monthly)`,
+        paymentMethod: maskedCardLabel,
+      };
+
+      const updatedSub: UserSubscription = {
+        id: prev[0]?.id || `SUB-RWJ-${now.getFullYear()}-001`,
+        planId: target.id,
+        planNameAr: target.nameAr,
+        planNameEn: target.nameEn,
+        storageGB: target.storageGB,
+        status: 'active',
+        billingCycle: cycle,
+        priceUSD: chargedAmount,
+        startDate: startDateISO,
+        nextRenewalDate: nextRenewalISO,
+        paymentMethod: brandLabel,
+        paymentMethodDetails: maskedCardLabel,
+        autoRenew: target.id !== 'free',
+        invoices: target.id === 'free' ? existingInvoices : [newInvoice, ...existingInvoices],
+      };
+
+      if (prev.length === 0) return [updatedSub];
+      return [updatedSub, ...prev.slice(1)];
+    });
+
+    // Record billing confirmation in Security Audit & Activity Logs (masked metadata only)
+    const audit: SecurityAuditItem = {
+      id: `aud-${Date.now()}`,
+      actionAr: `تمت ترقية الباقة إلى "${target.nameAr}" عبر بوابة الدفع الآمنة`,
+      actionEn: `Upgraded plan to "${target.nameEn}" via Secure Payment Gateway`,
+      timestamp: now.toISOString().replace('T', ' ').slice(0, 19) + ' UTC',
+      ip: '158.140.220.14',
+      status: 'success',
+      details: `3DS Verified · ${maskedCardLabel} · Ref ${txnRef} · $${chargedAmount.toFixed(2)}`,
+    };
+    setAuditLogs(logs => [audit, ...logs]);
+
+    logActivity({
+      type: 'system',
+      titleAr: `ترقية الباقة السحابية إلى ${target.nameAr}`,
+      titleEn: `Upgraded Cloud Plan to ${target.nameEn}`,
+      descriptionAr: `تم تأكيد الدفع بنجاح (${maskedCardLabel}) وتفعيل سعة ${
+        target.storageGB >= 1024 ? `${target.storageGB / 1024} TB` : `${target.storageGB} GB`
+      } فوراً`,
+      descriptionEn: `Payment verified (${maskedCardLabel}) and ${
+        target.storageGB >= 1024 ? `${target.storageGB / 1024} TB` : `${target.storageGB} GB`
+      } quota activated instantly`,
+      targetName: target.nameAr,
+      targetType: 'system',
+      ipAddress: '158.140.220.14',
+      device: 'Rawaj Cloud Web',
+      actor: currentUser?.email || 'rawajtel4@gmail.com',
+      severity: 'success',
+      metadata: {
+        securityMethod: 'TLS 1.3 + 3D Secure',
+        transactionRef: txnRef,
+        invoiceNumber: invNum,
+        billingCycle: cycle,
+      },
+    });
+
+    if (!options?.keepModalOpen) {
+      setPlansModalOpen(false);
+    }
+
+    showNotification(
+      `تمت ترقية باقتك إلى "${target.nameAr}" وتفعيل السعة السحابية بنجاح`,
+      `Successfully upgraded to "${target.nameEn}" plan`,
+      'success'
+    );
+  }, [allPlans, currentUser?.email, logActivity, showNotification]);
 
   const createPlan = useCallback((newPlanData: Omit<PlanTier, 'id'> & { id?: string }) => {
     const generatedId = newPlanData.id || `custom-plan-${Date.now()}`;
@@ -1864,6 +2022,10 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setVersionHistoryFile,
     plansModalOpen,
     setPlansModalOpen,
+    paymentGatewayPlan,
+    paymentGatewayCycle,
+    openPaymentGateway,
+    closePaymentGateway,
     onboardingOpen,
     setOnboardingOpen,
     securitySettings,

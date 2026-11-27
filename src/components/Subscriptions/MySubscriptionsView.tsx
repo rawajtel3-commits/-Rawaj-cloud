@@ -26,6 +26,7 @@ export const MySubscriptionsView: React.FC = () => {
     cancelSubscription,
     renewSubscription,
     toggleAutoRenew,
+    openPaymentGateway,
     setActiveTab,
     showNotification,
   } = useStorage();
@@ -73,7 +74,7 @@ Thank you for trusting Rawaj Cloud for your storage.
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 overflow-y-auto">
+    <div className="w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6 sm:space-y-8">
       
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#DCD3DF] dark:border-slate-800">
@@ -117,8 +118,8 @@ Thank you for trusting Rawaj Cloud for your storage.
               </span>
               <span className="text-[#6E6A75] dark:text-slate-400">
                 {isAr
-                  ? `سيتم تجديد اشتراك "${activeSub.planNameAr}" تلقائياً بتاريخ 15 يناير 2027 بمبلغ $${activeSub.priceUSD}.`
-                  : `Your plan will renew automatically on January 15, 2027 for $${activeSub.priceUSD}.`}
+                  ? `سيتم تجديد اشتراك "${activeSub.planNameAr}" تلقائياً بتاريخ ${formatDate(activeSub.nextRenewalDate, true)} بمبلغ $${activeSub.priceUSD.toFixed(2)}.`
+                  : `Your "${activeSub.planNameEn}" plan will renew automatically on ${formatDate(activeSub.nextRenewalDate, false)} for $${activeSub.priceUSD.toFixed(2)}.`}
               </span>
             </div>
           </div>
@@ -240,7 +241,7 @@ Thank you for trusting Rawaj Cloud for your storage.
 
                   <button
                     type="button"
-                    onClick={() => setActiveTab('available-plans')}
+                    onClick={() => openPaymentGateway()}
                     className="px-4 py-2 rounded-xl bg-[#F5EFF7] dark:bg-purple-950/40 border border-[#DCD3DF] dark:border-purple-800 text-[#4E115A] dark:text-purple-300 font-bold text-xs hover:bg-[#4E115A] hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-[#A38540]" />

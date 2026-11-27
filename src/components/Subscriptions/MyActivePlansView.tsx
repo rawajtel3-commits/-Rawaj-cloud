@@ -20,20 +20,23 @@ import {
   ChevronRight,
   Check,
 } from 'lucide-react';
-import { formatBytes } from '../../utils/formatters';
+import { formatBytes, formatDate } from '../../utils/formatters';
 
 export const MyActivePlansView: React.FC = () => {
   const {
     lang,
     currentPlan,
+    subscriptions,
     quota,
     flexWalletBalance,
     topUpFlexWallet,
+    openPaymentGateway,
     setActiveTab,
     showNotification,
   } = useStorage();
 
   const isAr = lang === 'ar';
+  const activeSub = subscriptions[0];
   const [rechargeModalOpen, setRechargeModalOpen] = useState(false);
   const [rechargeAmount, setRechargeAmount] = useState<number>(25);
 
@@ -59,7 +62,7 @@ export const MyActivePlansView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-slate-950 overflow-y-auto">
+    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-950">
       {/* View Header (Scrolls naturally with page content) */}
       <div className="border-b border-[#DCD3DF] dark:border-slate-800 bg-[#F5EFF7]/60 dark:bg-slate-900/60 px-4 sm:px-6 py-4 sm:py-5">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -88,11 +91,11 @@ export const MyActivePlansView: React.FC = () => {
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full md:w-auto">
             <button
               type="button"
-              onClick={() => setActiveTab('available-plans')}
+              onClick={() => openPaymentGateway()}
               className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#4E115A] hover:bg-[#3D0D47] text-white text-xs font-bold shadow-md shadow-[#4E115A]/25 transition-all transform active:scale-95 whitespace-nowrap cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
-              <span>{isAr ? 'ترقية / تغيير الباقة' : 'Upgrade / Change Plan'}</span>
+              <span>{isAr ? 'ترقية الباقة الآن' : 'Upgrade Plan Now'}</span>
               <ArrowRight className={`w-3.5 h-3.5 shrink-0 ${isAr ? 'rotate-180' : ''}`} />
             </button>
             <button
@@ -107,7 +110,7 @@ export const MyActivePlansView: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto w-full p-4 sm:p-6 pb-20 sm:pb-8 space-y-6">
+      <div className="max-w-6xl mx-auto w-full p-4 sm:p-6 pb-28 space-y-6">
         
         {/* Active Plan Hero Card */}
         <div className="relative overflow-hidden rounded-3xl border border-[#DCD3DF] dark:border-slate-800 bg-gradient-to-br from-[#4E115A] via-[#3a0c43] to-[#25082b] text-white p-7 shadow-xl">
@@ -364,27 +367,31 @@ export const MyActivePlansView: React.FC = () => {
               <div className="text-xs font-bold text-amber-700 dark:text-amber-400">
                 {isAr ? 'موعد التجديد التلقائي القادم' : 'Upcoming Automatic Renewal'}
               </div>
-              <div className="text-base font-black text-[#1E1E24] dark:text-white mt-0.5">
-                15 {isAr ? 'يناير' : 'January'} 2027 (متبقي 340 يوماً)
+              <div className="text-base font-black text-[#1E1E24] dark:text-white mt-0.5 font-mono tabular-nums">
+                {activeSub?.nextRenewalDate
+                  ? formatDate(activeSub.nextRenewalDate, isAr)
+                  : (isAr ? '15 يناير 2027' : 'January 15, 2027')}
               </div>
               <div className="text-xs text-[#6E6A75] dark:text-slate-400">
                 {isAr
-                  ? 'سيتم الخصم عبر بطاقة Mada المنتهية برقم 4812 مع إشعار مسبق قبل 7 أيام'
-                  : 'Will be billed to Mada card ending in 4812 with a 7-day prior notification'}
+                  ? `سيتم الخصم عبر ${activeSub?.paymentMethodDetails || 'Mada (•••• 4812)'} مع إشعار مسبق قبل 7 أيام`
+                  : `Will be billed via ${activeSub?.paymentMethodDetails || 'Mada (•••• 4812)'} with a 7-day prior notice`}
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
             <button
+              type="button"
               onClick={() => setActiveTab('subscriptions')}
-              className="flex-1 md:flex-initial px-4 py-2.5 rounded-xl border border-[#DCD3DF] dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-[#1E1E24] dark:text-white hover:bg-slate-50 transition-colors text-center"
+              className="flex-1 md:flex-initial px-4 py-2.5 rounded-xl border border-[#DCD3DF] dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-[#1E1E24] dark:text-white hover:bg-slate-50 transition-colors text-center cursor-pointer"
             >
               {isAr ? 'إدارة الاشتراك وتفاصيل الدفع' : 'Manage Subscription & Invoices'}
             </button>
             <button
-              onClick={() => setActiveTab('available-plans')}
-              className="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-[#4E115A] hover:bg-[#3D0D47] text-white text-xs font-bold transition-colors text-center"
+              type="button"
+              onClick={() => openPaymentGateway()}
+              className="flex-1 md:flex-initial px-4 py-2.5 rounded-xl bg-[#4E115A] hover:bg-[#3D0D47] text-white text-xs font-bold transition-colors text-center cursor-pointer"
             >
               {isAr ? 'ترقية المساحة الآن' : 'Upgrade Storage Now'}
             </button>

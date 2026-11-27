@@ -276,7 +276,7 @@ export const StorageUsageInsightsView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto bg-white dark:bg-slate-950">
+    <div className="w-full flex-1 p-4 sm:p-6 lg:p-8 pb-28 space-y-6 bg-white dark:bg-slate-950">
       
       {/* ============================================================== */}
       {/* 1. Header Banner & Quick Quota KPI Cards                        */}

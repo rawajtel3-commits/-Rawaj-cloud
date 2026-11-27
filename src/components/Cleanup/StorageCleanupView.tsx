@@ -329,7 +329,7 @@ export const StorageCleanupView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-950 p-4 sm:p-6 lg:p-8 pb-28 space-y-6">
       
       {/* Hero Header Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#4E115A] via-[#3d0d46] to-[#25092a] text-white p-6 sm:p-8 shadow-xl">

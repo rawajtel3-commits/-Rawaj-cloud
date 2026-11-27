@@ -35,7 +35,7 @@ export const UploadManager: React.FC = () => {
   const completedCount = uploadTasks.filter(t => t.status === 'completed' || t.status === 'deduplicated').length;
 
   return (
-    <aside aria-label="Upload Queue Manager" className="fixed bottom-20 sm:bottom-24 rtl:left-4 ltr:right-4 z-40 w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200">
+    <aside aria-label="Upload Queue Manager" className="fixed bottom-[calc(156px+env(safe-area-inset-bottom))] rtl:left-4 ltr:right-4 z-40 w-96 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-all duration-200">
       
       {/* Header Bar */}
       <div

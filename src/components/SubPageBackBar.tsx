@@ -22,6 +22,9 @@ const TAB_LABELS: Record<ActiveTabType, { ar: string; en: string }> = {
   cleanup: { ar: 'تنظيف وتحرير المساحة', en: 'Storage Cleanup' },
   auth: { ar: 'بوابة الحساب وتسجيل الدخول', en: 'Account & Sign In' },
   'activity-log': { ar: 'سجل النشاطات والتدقيق الأمني', en: 'Activity & Audit Log' },
+  'cloud-tools': { ar: 'أدوات السحابة', en: 'Cloud Tools' },
+  reconciliation: { ar: 'مطابقة فواتير السحابة', en: 'Cloud Billing Reconciliation' },
+  'social-verification': { ar: 'توثيق حسابات التواصل الاجتماعي', en: 'Social Media Verification' },
 };
 
 export const SubPageBackBar: React.FC = () => {
@@ -73,7 +76,7 @@ export const SubPageBackBar: React.FC = () => {
 
   return (
     <div
-      className="shrink-0 bg-[#F9F6FB] dark:bg-slate-900/95 border-b border-[#DCD3DF]/80 dark:border-slate-800 px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3 select-none"
+      className="sticky top-0 z-20 shrink-0 bg-[#F9F6FB]/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-[#DCD3DF]/80 dark:border-slate-800 px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3 select-none"
       role="navigation"
       aria-label={isAr ? 'شريط الرجوع للصفحة الفرعية' : 'Sub-page back navigation'}
     >

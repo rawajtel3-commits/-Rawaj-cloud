@@ -27,37 +27,14 @@ import {
   Server,
   Zap,
 } from 'lucide-react';
-import { evaluatePasswordStrength, generateVaultPassword } from '../../utils/vaultPasswordGenerator';
+import { generateVaultPassword } from '../../utils/vaultPasswordGenerator';
+import {
+  PasswordComplexityHelper,
+  evaluatePasswordComplexity,
+} from './PasswordComplexityHelper';
 
 // Email standard RFC format regex
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-// Password complexity helper
-interface PasswordComplexity {
-  minLength: boolean;
-  hasSymbol: boolean;
-  hasNumber: boolean;
-  hasUppercase: boolean;
-  hasLowercase: boolean;
-  isAllMet: boolean;
-}
-
-function checkPasswordComplexity(pwd: string): PasswordComplexity {
-  const minLength = pwd.length >= 8;
-  const hasSymbol = /[!@#$%^&*()_+\-=[\]{}|;:,.<>?~]/.test(pwd);
-  const hasNumber = /[0-9]/.test(pwd);
-  const hasUppercase = /[A-Z]/.test(pwd);
-  const hasLowercase = /[a-z]/.test(pwd);
-
-  return {
-    minLength,
-    hasSymbol,
-    hasNumber,
-    hasUppercase,
-    hasLowercase,
-    isAllMet: minLength && hasSymbol && hasNumber && (hasUppercase || hasLowercase),
-  };
-}
 
 export const AuthView: React.FC = () => {
   const {
@@ -122,12 +99,12 @@ export const AuthView: React.FC = () => {
 
   // Password complexity validations
   const registerPasswordComplexity = useMemo(
-    () => checkPasswordComplexity(registerPassword),
+    () => evaluatePasswordComplexity(registerPassword),
     [registerPassword]
   );
 
   const resetPasswordComplexity = useMemo(
-    () => checkPasswordComplexity(newResetPassword),
+    () => evaluatePasswordComplexity(newResetPassword),
     [newResetPassword]
   );
 
@@ -135,12 +112,6 @@ export const AuthView: React.FC = () => {
   const passwordsMatch = useMemo(
     () => registerPassword.length > 0 && registerPassword === registerConfirmPassword,
     [registerPassword, registerConfirmPassword]
-  );
-
-  // Password Strength calculation for Registration
-  const passwordStrength = useMemo(
-    () => evaluatePasswordStrength(registerPassword),
-    [registerPassword]
   );
 
   // =========================================================================
@@ -233,7 +204,7 @@ export const AuthView: React.FC = () => {
       return;
     }
 
-    // Check Complexity: Min length & symbols
+    // Check Complexity: Min length, uppercase, lowercase, digits & special symbols
     if (!registerPasswordComplexity.minLength) {
       showNotification(
         'يجب ألا تقل كلمة المرور عن 8 خانات لضمان أمان التشفير الصفري',
@@ -243,10 +214,10 @@ export const AuthView: React.FC = () => {
       return;
     }
 
-    if (!registerPasswordComplexity.hasSymbol) {
+    if (!registerPasswordComplexity.hasUppercase || !registerPasswordComplexity.hasLowercase) {
       showNotification(
-        'يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل (!@#$%...)',
-        'Password must include at least one special symbol (!@#$)',
+        'يجب أن تحتوي كلمة المرور على حرف كبير (A-Z) وحرف صغير (a-z) على الأقل',
+        'Password must include both uppercase (A-Z) and lowercase (a-z) letters',
         'warning'
       );
       return;
@@ -255,7 +226,16 @@ export const AuthView: React.FC = () => {
     if (!registerPasswordComplexity.hasNumber) {
       showNotification(
         'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل (0-9)',
-        'Password must contain at least one number',
+        'Password must contain at least one digit (0-9)',
+        'warning'
+      );
+      return;
+    }
+
+    if (!registerPasswordComplexity.hasSymbol) {
+      showNotification(
+        'يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل (!@#$%...)',
+        'Password must include at least one special character (!@#$)',
         'warning'
       );
       return;
@@ -363,7 +343,7 @@ export const AuthView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-slate-50 dark:bg-slate-950 overflow-y-auto">
+    <div className="w-full flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 pb-28">
       
       {/* Top Floating Mini Header */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between shrink-0">
@@ -887,111 +867,12 @@ export const AuthView: React.FC = () => {
                         </button>
                       </div>
 
-                      {/* Real-Time Password Complexity Checklist */}
-                      <div className="mt-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/80 dark:border-slate-800 space-y-1.5 text-[11px]">
-                        <div className="font-semibold text-slate-700 dark:text-slate-300 text-[10px] uppercase font-mono tracking-wider flex items-center justify-between">
-                          <span>{isAr ? 'شروط ومعايير تعقيد كلمة المرور:' : 'Password Complexity Requirements:'}</span>
-                          <span
-                            className={`font-bold ${
-                              registerPasswordComplexity.isAllMet ? 'text-[#1AD062]' : 'text-amber-500'
-                            }`}
-                          >
-                            {registerPasswordComplexity.isAllMet
-                              ? (isAr ? '✓ مستوفية للشروط' : '✓ Requirements Met')
-                              : (isAr ? 'مطلوبة للأمان' : 'Security Requirements')}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
-                          {/* 1. Min Length >= 8 */}
-                          <div
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors ${
-                              registerPasswordComplexity.minLength
-                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold'
-                                : 'text-slate-500 dark:text-slate-400 bg-white/60 dark:bg-slate-900/60'
-                            }`}
-                          >
-                            {registerPasswordComplexity.minLength ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-[#1AD062] shrink-0" />
-                            ) : (
-                              <span className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
-                            )}
-                            <span>{isAr ? '8 خانات على الأقل' : 'At least 8 characters'}</span>
-                          </div>
-
-                          {/* 2. Special Symbol */}
-                          <div
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors ${
-                              registerPasswordComplexity.hasSymbol
-                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold'
-                                : 'text-slate-500 dark:text-slate-400 bg-white/60 dark:bg-slate-900/60'
-                            }`}
-                          >
-                            {registerPasswordComplexity.hasSymbol ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-[#1AD062] shrink-0" />
-                            ) : (
-                              <span className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
-                            )}
-                            <span>{isAr ? 'رمز خاص واحد (!@#$...)' : 'At least 1 symbol (!@#$)'}</span>
-                          </div>
-
-                          {/* 3. Number */}
-                          <div
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors ${
-                              registerPasswordComplexity.hasNumber
-                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold'
-                                : 'text-slate-500 dark:text-slate-400 bg-white/60 dark:bg-slate-900/60'
-                            }`}
-                          >
-                            {registerPasswordComplexity.hasNumber ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-[#1AD062] shrink-0" />
-                            ) : (
-                              <span className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
-                            )}
-                            <span>{isAr ? 'رقم واحد على الأقل (0-9)' : 'At least 1 number (0-9)'}</span>
-                          </div>
-
-                          {/* 4. Uppercase & Lowercase letters */}
-                          <div
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-lg transition-colors ${
-                              registerPasswordComplexity.hasUppercase && registerPasswordComplexity.hasLowercase
-                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 font-bold'
-                                : 'text-slate-500 dark:text-slate-400 bg-white/60 dark:bg-slate-900/60'
-                            }`}
-                          >
-                            {registerPasswordComplexity.hasUppercase && registerPasswordComplexity.hasLowercase ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-[#1AD062] shrink-0" />
-                            ) : (
-                              <span className="w-3.5 h-3.5 rounded-full border border-slate-300 dark:border-slate-700 shrink-0" />
-                            )}
-                            <span>{isAr ? 'أحرف كبيرة وصغيرة (A-z)' : 'Uppercase & lowercase (A-z)'}</span>
-                          </div>
-                        </div>
-
-                        {/* Strength meter bar */}
-                        {registerPassword.length > 0 && (
-                          <div className="pt-1 space-y-1">
-                            <div className="flex items-center justify-between text-[10px] text-slate-500">
-                              <span>
-                                {isAr ? 'المستوى الأمني:' : 'Security Level:'}{' '}
-                                <strong style={{ color: passwordStrength.color }}>
-                                  {isAr ? passwordStrength.labelAr : passwordStrength.labelEn}
-                                </strong>
-                              </span>
-                              <span className="font-mono">{passwordStrength.entropyBits} bits entropy</span>
-                            </div>
-                            <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-300"
-                                style={{
-                                  width: `${passwordStrength.score}%`,
-                                  backgroundColor: passwordStrength.color,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      {/* Real-Time Password Complexity Validation Visual Helper */}
+                      <PasswordComplexityHelper
+                        password={registerPassword}
+                        touched={registerPasswordTouched}
+                        isAr={isAr}
+                      />
                     </div>
 
                     {/* Confirm Password with Real-time Match Indicator */}
@@ -1059,7 +940,7 @@ export const AuthView: React.FC = () => {
                       <label className="block text-xs font-bold text-[#1E1E24] dark:text-slate-200 mb-1">
                         {isAr ? 'مركز البيانات والسيادة السحابية:' : 'Storage Region:'}
                       </label>
-                      <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                         {[
                           { id: 'me-central-1', labelAr: 'الرياض (KSA)', labelEn: 'Riyadh (KSA)' },
                           { id: 'eu-west-1', labelAr: 'فرانكفورت (EU)', labelEn: 'Frankfurt (EU)' },
@@ -1225,25 +1106,12 @@ export const AuthView: React.FC = () => {
                             className="w-full py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-[#1E1E24] dark:text-white font-mono"
                           />
 
-                          {/* Quick checklist for reset password */}
-                          <div className="flex flex-wrap gap-2 mt-1.5 text-[10px]">
-                            <span
-                              className={`flex items-center gap-1 ${
-                                resetPasswordComplexity.minLength ? 'text-[#1AD062]' : 'text-slate-400'
-                              }`}
-                            >
-                              {resetPasswordComplexity.minLength ? '✓' : '•'}{' '}
-                              {isAr ? '8 خانات على الأقل' : 'Min 8 chars'}
-                            </span>
-                            <span
-                              className={`flex items-center gap-1 ${
-                                resetPasswordComplexity.hasSymbol ? 'text-[#1AD062]' : 'text-slate-400'
-                              }`}
-                            >
-                              {resetPasswordComplexity.hasSymbol ? '✓' : '•'}{' '}
-                              {isAr ? 'رمز خاص (!@#$)' : 'Special symbol'}
-                            </span>
-                          </div>
+                          <PasswordComplexityHelper
+                            password={newResetPassword}
+                            touched={newResetPasswordTouched}
+                            isAr={isAr}
+                            compact
+                          />
                         </div>
                       </>
                     )}
